@@ -5,7 +5,11 @@
 The DisplayPort specification requires that monitors provide an [EDID](https://en.wikipedia.org/wiki/Extended_Display_Identification_Data), but inexpensive KVM switches like the
 [IOGEAR 2-Port USB DisplayPort Cable KVM](https://www.iogear.com/product/GCS52DP/) do not provide EDID information to the inactive computer.  This can cause [display problems](https://docs.kernel.org/admin-guide/edid.html).
 
+The following is a combination of things I found in various places on the internet and thought it would be good to have them all in one place.
+
 You will need to do the following on all Linux computers connected to the KVM.  Reboot the computer after making the changes below.
+
+Note that Nvidia GPU drivers can manage EDID files, see for example [Managing a Display EDID on windows](https://nvidia.custhelp.com/app/answers/detail/a_id/3569/~/managing-a-display-edid-on-windows) and there are xorg.conf options for Nvidea drivers to set the EDID as well.  As far as I know, the following also works with Nvidia GPUs but I have not tested it.
 
 The solution for Linux is to use the kernel parameters:
 
@@ -26,9 +30,9 @@ Add the following to your `/etc/default/grub` file in the `GRUB_CMDLINE_LINUX=` 
 video=DP-1:3840x2160@30e drm.edid_firmware=edid/edid.bin
 ```
 
-You will need to modify the line above to match your configuration.  Then in Fedora `grub2-mkconfig` will update the options in the files in `/boot/loader/entries/`.  Or you can modify one of these by hand to test it out.  This example uses the same EDID for all ports.  Putting `DP-1:` in front of the EDID file will apply it to only that port.
+You will need to modify the line above to match your configuration.  Then in Fedora running `grub2-mkconfig` will update the options in the files in `/boot/loader/entries/`.  Or you can modify one of these by hand to test it out.  This example uses the same EDID for all ports, which I have simply named `edid.bin` in this example.  Putting `DP-1:` in front of the EDID filename will apply it to only that port.
 
-I found that I did not need to use the `nomodeset` kernel parameter, and in fact it causes problems.
+I found that I did not need to use the `nomodeset` kernel parameter, and in fact it caused problems.
 
 ### getting the current display mode
 
@@ -49,7 +53,7 @@ and doing `cat /sys/class/drm/card1-DP-1/status` shows that it is connected.
 
 ### getting an EDID file for your monitor 
 
-use the monitor-edid package command:
+Use the monitor-edid package command:
 ```
 monitor-get-edid > edid.bin
 ```
@@ -59,13 +63,13 @@ Put this file in `/lib/firmware/edid/`, you might need to make the edid subdirec
 
 ### Adding the EDID file to the initramfs
 
-It turns out that the video module (amdgpu in my case) looks for the edid file early in the boot process, so it needs to be in the initramfs file.
-Put the following in the file `/etc/dracut.conf.d/99-edid.conf`
+It turns out that the video module (amdgpu in my case) looks for the EDID file early in the boot process, so it needs to be in the initramfs file.
+Create the file `/etc/dracut.conf.d/99-edid.conf` with the contents:
 ```
 install_items+=" /lib/firmware/edid/edid.bin "
 ```
 and then run `dracut -f` to add this to the currently running kernel's initramfs file.
-You can check the contents of this file with `lsinitrd`  You can grep `dmesg` output for 'edid' to check for errors related to loading this file after rebooting.
+You can check the contents of this file with `lsinitrd`  You can grep `dmesg` output for `edid` to check for errors related to loading this file after rebooting.
 
 ## Virtual Console font size
 
