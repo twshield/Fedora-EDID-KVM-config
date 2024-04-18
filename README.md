@@ -9,7 +9,7 @@ The following is a combination of things I found in various places on the intern
 
 You will need to do the following on all Linux computers connected to the KVM.  Reboot the computer after making the changes below.
 
-Note that Nvidia GPU drivers can manage EDID files, see for example [Managing a Display EDID on windows](https://nvidia.custhelp.com/app/answers/detail/a_id/3569/~/managing-a-display-edid-on-windows) and there are xorg.conf options for Nvidea drivers to set the EDID as well.  As far as I know, the following also works with Nvidia GPUs but I have not tested it.
+Note that Nvidia GPU drivers can manage EDID files, see for example [Managing a Display EDID on windows](https://nvidia.custhelp.com/app/answers/detail/a_id/3569/~/managing-a-display-edid-on-windows) and there are xorg.conf options for Nvidia drivers to set the EDID as well.  As far as I know, the following also works with Nvidia GPUs but I have not tested it.
 
 The solution for Linux is to use the kernel parameters:
 
@@ -34,11 +34,11 @@ You will need to modify the line above to match your configuration.  Then in Fed
 
 I found that I did not need to use the `nomodeset` kernel parameter, and in fact it caused problems.
 
-### getting the current display mode
+### Getting the current display mode
 
 I found that I did not get working virtual consoles unless I also specified the display mode to use.  The command `xrandr` will show you the modes and indicate which one you are using. For my monitor I used the mode `3840x2160@30` in the above.  Note that the trailing `e` in the video parameter is to enable the port, it is not part of the mode.
 
-### getting video port in use 
+### Getting video port in use 
 
 The `DP-1` above is the video port that I have connected to my KVM (note that xrandr displays different names, don't use these).  Find your connected port by looking at the directories in `/sys/class/drm`, I have 
 ```
@@ -51,7 +51,7 @@ card1-HDMI-A-2
 ```
 and doing `cat /sys/class/drm/card1-DP-1/status` shows that it is connected.
 
-### getting an EDID file for your monitor 
+### Getting an EDID file for your monitor 
 
 Use the monitor-edid package command:
 ```
